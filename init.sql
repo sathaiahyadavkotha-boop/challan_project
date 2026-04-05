@@ -19,12 +19,13 @@ CREATE TABLE IF NOT EXISTS vehicles (
 
 CREATE TABLE IF NOT EXISTS violations (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  vehicle_id INT,
+  vehicle_id INT NOT NULL,
   sensor_code VARCHAR(100) NOT NULL,
   pollution_value FLOAT NOT NULL,
   violation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (vehicle_id) REFERENCES vehicles(id)
 );
+
 CREATE TABLE IF NOT EXISTS challans (
   id INT AUTO_INCREMENT PRIMARY KEY,
   vehicle_id INT NOT NULL,
@@ -34,7 +35,7 @@ CREATE TABLE IF NOT EXISTS challans (
   FOREIGN KEY (vehicle_id) REFERENCES vehicles(id)
 );
 
+-- Admin user
 DELETE FROM gov_users WHERE username='admin';
-
 INSERT INTO gov_users (username, password_hash)
 VALUES ('admin', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi');
