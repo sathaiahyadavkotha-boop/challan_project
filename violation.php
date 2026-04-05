@@ -15,12 +15,8 @@ if ($conn->connect_error) {
 $sensor_code     = $_POST['sensor_code'] ?? null;
 $pollution_value = $_POST['pollution_value'] ?? null;
 
-// Step 2: If no POST data, stop early
-if (!$sensor_code || !$pollution_value) {
-    echo json_encode(["status"=>"error","message"=>"Missing sensor_code or pollution_value"]);
-    exit;
-}
-
+$stmt = $conn->prepare("SELECT id, vehicle_number FROM vehicles WHERE sensor_code=?");
+$stmt->bind_param("s", $sensor_code);
 // Step 3: Check vehicle exists
 $stmt = $conn->prepare("SELECT id, vehicle_number FROM vehicles WHERE sensor_code=?");
 $stmt->bind_param("s", $sensor_code);
