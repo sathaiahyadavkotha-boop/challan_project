@@ -17,6 +17,7 @@ if ($conn->connect_error) {
 $vehicle_number = $_POST['vehicle_number'] ?? null;
 $message = null;
 $row = null;
+$violations_last_90 = 0;
 $total_challans = 0;
 $unpaid_challans = 0;
 $latest_challan = null;
@@ -31,27 +32,39 @@ if ($vehicle_number) {
     if ($result->num_rows > 0) {
         $row = $result->fetch_assoc();
 
-        // Count total challans
-        $stmt2 = $conn->prepare("SELECT COUNT(*) AS total_challans FROM challans WHERE vehicle_id=?");
-        $stmt2->bind_param("i", $row['id']);
-        $stmt2->execute();
-        $result2 = $stmt2->get_result();
-        $total_challans = $result2->fetch_assoc()['total_challans'];
+        // Violations in last 90 days
+        $stmtV = $conn->prepare("
+            SELECT COUNT(*) AS violations_last_90_days
+            FROM violations
+            WHERE vehicle_id = ?
+              AND violation_date >= DATE_SUB(NOW(), INTERVAL 90 DAY)
+        ");
+        $stmtV->bind_param("i", $row['id']);
+        $stmtV->execute();
+        $resultV = $stmtV->get_result();
+        $violations_last_90 = $resultV->fetch_assoc()['violations_last_90_days'];
 
-        // Count unpaid challans
-        $stmt3 = $conn->prepare("SELECT COUNT(*) AS unpaid_challans FROM challans WHERE vehicle_id=? AND status='unpaid'");
-        $stmt3->bind_param("i", $row['id']);
-        $stmt3->execute();
-        $result3 = $stmt3->get_result();
-        $unpaid_challans = $result3->fetch_assoc()['unpaid_challans'];
+        // Total challans
+        $stmtC = $conn->prepare("SELECT COUNT(*) AS total_challans FROM challans WHERE vehicle_id=?");
+        $stmtC->bind_param("i", $row['id']);
+        $stmtC->execute();
+        $resultC = $stmtC->get_result();
+        $total_challans = $resultC->fetch_assoc()['total_challans'];
+
+        // Unpaid challans
+        $stmtU = $conn->prepare("SELECT COUNT(*) AS unpaid_challans FROM challans WHERE vehicle_id=? AND status='unpaid'");
+        $stmtU->bind_param("i", $row['id']);
+        $stmtU->execute();
+        $resultU = $stmtU->get_result();
+        $unpaid_challans = $resultU->fetch_assoc()['unpaid_challans'];
 
         // Latest challan info
-        $stmt4 = $conn->prepare("SELECT amount, status, challan_date FROM challans WHERE vehicle_id=? ORDER BY challan_date DESC LIMIT 1");
-        $stmt4->bind_param("i", $row['id']);
-        $stmt4->execute();
-        $result4 = $stmt4->get_result();
-        if ($result4->num_rows > 0) {
-            $latest_challan = $result4->fetch_assoc();
+        $stmtL = $conn->prepare("SELECT amount, status, challan_date FROM challans WHERE vehicle_id=? ORDER BY challan_date DESC LIMIT 1");
+        $stmtL->bind_param("i", $row['id']);
+        $stmtL->execute();
+        $resultL = $stmtL->get_result();
+        if ($resultL->num_rows > 0) {
+            $latest_challan = $resultL->fetch_assoc();
         }
 
     } else {
@@ -76,13 +89,14 @@ $conn->close();
     <div class="message success">
       Owner: <b><?php echo htmlspecialchars($row['owner_name']); ?></b><br>
       Vehicle: <b><?php echo htmlspecialchars($row['vehicle_number']); ?></b><br>
+      Violations in last 90 days: <b><?php echo $violations_last_90; ?></b><br>
       Total Challans: <b><?php echo $total_challans; ?></b><br>
       Unpaid Challans: <b><?php echo $unpaid_challans; ?></b>
     </div>
 
     <?php if ($unpaid_challans >= 3): ?>
       <div class="message danger">🚨 This vehicle has skipped 3 or more challans! Strict action required.</div>
-    <?php elseif ($unpaid_challans > 0): ?>
+    <?php elseif ($unpaid_challans > 0 && $latest_challan): ?>
       <div class="message warning">⚠️ Payment Pending! Please pay.</div>
       <p>Amount Due: <b>₹<?php echo $latest_challan['amount']; ?></b></p>
       <p>Last Challan Date: <b><?php echo $latest_challan['challan_date']; ?></b></p>
