@@ -15,12 +15,11 @@ if ($conn->connect_error) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Trim to avoid accidental spaces
     $username = trim($_POST['username']);
     $password = trim($_POST['password']);
 
-    // Query the stored hash
-    $stmt = $conn->prepare("SELECT password_hash FROM gov_users WHERE username=?");
+    // Query both columns
+    $stmt = $conn->prepare("SELECT password, password_hash FROM gov_users WHERE username=?");
     $stmt->bind_param("s", $username);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -28,15 +27,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($result && $result->num_rows > 0) {
         $row = $result->fetch_assoc();
 
-        // Verify entered password against bcrypt hash
-        if (password_verify($password, $row['password_hash'])) {
+        // First check plain text column
+        if (!empty($row['password']) && $password === $row['password']) {
             $_SESSION['gov_user'] = true;
             header("Location: register.php");
             exit();
-        } else {
-            header("Location: error.php?type=password");
+        }
+
+        // Then check hashed column
+        if (!empty($row['password_hash']) && password_verify($password, $row['password_hash'])) {
+            $_SESSION['gov_user'] = true;
+            header("Location: register.php");
             exit();
         }
+
+        // If neither matched
+        header("Location: error.php?type=password");
+        exit();
     } else {
         header("Location: error.php?type=password");
         exit();
