@@ -25,6 +25,14 @@ CREATE TABLE IF NOT EXISTS violations (
   violation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (vehicle_id) REFERENCES vehicles(id)
 );
+CREATE TABLE IF NOT EXISTS challans (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  vehicle_id INT NOT NULL,
+  challan_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  amount DECIMAL(10,2) NOT NULL,
+  status ENUM('unpaid','paid') DEFAULT 'unpaid',
+  FOREIGN KEY (vehicle_id) REFERENCES vehicles(id)
+);
 
 DELETE FROM gov_users WHERE username='admin';
 
