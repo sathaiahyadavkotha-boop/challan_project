@@ -15,6 +15,7 @@ CREATE TABLE violations (
   vehicle_id INT,
   sensor_code VARCHAR(50),
   pollution_value FLOAT,
+  violation_count INT DEFAULT 0,
   violation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (vehicle_id) REFERENCES vehicles(id)
 );
