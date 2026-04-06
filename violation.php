@@ -1,5 +1,14 @@
 <?php
+// Always include the DB connection first
 include 'db_connect.php';
+
+// Check if connection exists
+if (!isset($conn) || $conn->connect_error) {
+    die(json_encode([
+        "status" => "error",
+        "message" => "Database connection failed: " . ($conn->connect_error ?? "No connection")
+    ]));
+}
 
 $sensor_code     = $_POST['sensor_code'] ?? null;
 $pollution_value = $_POST['pollution_value'] ?? null;
