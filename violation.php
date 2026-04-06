@@ -14,6 +14,7 @@ if ($conn->connect_error) {
 // Step 1: Safely read POST data
 $sensor_code     = $_POST['sensor_code'] ?? null;
 $pollution_value = $_POST['pollution_value'] ?? null;
+$violation_count = $_POST['violation_count'] ?? null;
 
 $stmt = $conn->prepare("SELECT id, vehicle_number FROM vehicles WHERE sensor_code=?");
 $stmt->bind_param("s", $sensor_code);
@@ -35,10 +36,10 @@ $row = $result->fetch_assoc();
 $vehicle_id = $row['id'];
 
 $stmt2 = $conn->prepare("
-    INSERT INTO violations (vehicle_id, sensor_code, pollution_value, violation_date)
-    VALUES (?, ?, ?, NOW())
+    INSERT INTO violations (vehicle_id, sensor_code, pollution_value, violation_count, violation_date)
+    VALUES (?, ?, ?, ?, NOW())
 ");
-$stmt2->bind_param("iss", $vehicle_id, $sensor_code, $pollution_value);
+$stmt2->bind_param("issi", $vehicle_id, $sensor_code, $pollution_value, $violation_count);
 $stmt2->execute();
 
 // Step 5: Count violations in last 1 minute
