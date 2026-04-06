@@ -1,10 +1,10 @@
 <?php
 $conn = new mysqli(
-    getenv("MYSQLHOST"),      // Use Railway's MySQL host
-    getenv("MYSQLUSER"),      // Use Railway's MySQL user
-    getenv("MYSQLPASSWORD"),  // Use Railway's MySQL password
-    getenv("MYSQLDATABASE"),  // Use Railway's MySQL database
-    getenv("MYSQLPORT")       // Use Railway's MySQL port
+    getenv("MYSQLHOST"),
+    getenv("MYSQLUSER"),
+    getenv("MYSQLPASSWORD"),
+    getenv("MYSQLDATABASE"),
+    getenv("MYSQLPORT")
 );
 
 if ($conn->connect_error) {
