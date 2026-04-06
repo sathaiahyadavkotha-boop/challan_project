@@ -1,9 +1,9 @@
 <?php
-$host = $_ENV['mysql-ifj.railway.internal'];
-$user = $_ENV['root'];
-$pass = $_ENV['OqBOdvXusaRyGzBoZbGVQLSrUeQgoRtt'];
-$db   = $_ENV['railway'];
-$port = $_ENV['3306'];
+$host = 'mysql-ifj.railway.internal';
+$user = 'root';
+$pass = 'OqBOdvXusaRyGzBoZbGVQLSrUeQgoRtt';
+$db   = 'railway';
+$port = 3306;
 
 $conn = new mysqli($host, $user, $pass, $db, $port);
 
