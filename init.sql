@@ -26,6 +26,8 @@ CREATE TABLE IF NOT EXISTS violations (
   violation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (vehicle_id) REFERENCES vehicles(id),
   UNIQUE KEY uq_vehicle (vehicle_id)
+  ALTER TABLE challans ADD COLUMN violation_count INT NOT NULL DEFAULT 0;
+
 );
 
 CREATE TABLE IF NOT EXISTS challans (
